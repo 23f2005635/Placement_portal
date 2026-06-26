@@ -1,0 +1,9 @@
+Flask-JWT-Extended
+flask
+flask-restful
+flask-security-too
+flask-sqlalchemy
+flask-cors
+celery
+redis
+python-dotenv

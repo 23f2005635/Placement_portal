@@ -92,7 +92,7 @@ class LogoutAPI(Resource):
         return make_response(jsonify(response), 200)
     
 
-class RegisterAPI(Resource):
+class RegistersAPI(Resource):
     def post(self):
         creds = request.get_json()
 
@@ -123,7 +123,58 @@ class RegisterAPI(Resource):
             }
             return make_response(jsonify(result), 409)
         
-        user_role = user_datastore.find_role('user')
+        user_role = user_datastore.find_role('student')
+
+        user_datastore.create_user(
+            email=email,
+            password=password,
+            roles = [user_role]
+        )
+
+        db.session.commit()
+
+        response = {
+            'message': 'Registration successful.',
+            'user_details': {
+                'email': email,
+                'roles': [user_role.name]
+            }
+        }
+        return make_response(jsonify(response), 201)
+
+
+class RegistercAPI(Resource):
+    def post(self):
+        creds = request.get_json()
+
+        if not creds:
+            result = {
+                'message': 'Registration credentials are required.'
+            }
+            return make_response(jsonify(result), 400)
+        
+        email = creds.get('email', None)
+        password = creds.get('password', None)
+
+        if not email or not password:
+            result = {
+                'message': 'Email and password are required.'
+            }
+            return make_response(jsonify(result), 400)
+        
+        # if '@' not in email or '.' not in email.split('@')[-1]:
+        #     result = {
+        #         'message': 'Invalid email format.'
+        #     }
+        #     return make_response(jsonify(result), 400)
+        
+        if user_datastore.find_user(email=email):
+            result = {
+                'message': 'User already exists.'
+            }
+            return make_response(jsonify(result), 409)
+        
+        user_role = user_datastore.find_role('company')
 
         user_datastore.create_user(
             email=email,

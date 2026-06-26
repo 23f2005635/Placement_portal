@@ -1,8 +1,6 @@
 from flask import Flask
-from flask_security import Security
-
+from flask_security import Security, hash_password
 from flask_restful import Api
-
 from flask_cors import CORS
 
 from controllers.database import db
@@ -64,27 +62,28 @@ CORS(app, origins=[
     
 # api.add_resource(Index, '/')
 
-@app.route('/celery_example', methods=['GET'])
-def celery_example():
-    from celery_app import example_task
-    example_task.delay()
-    return {
-        'message': 'Celery task has been started!'
-    }, 200
+# @app.route('/celery_example', methods=['GET'])
+# def celery_example():
+#     from celery_app import example_task
+#     example_task.delay()
+#     return {
+#         'message': 'Celery task has been started!'
+#     }, 200
 
-@app.route('/generate_csv', methods=['GET'])
-def generate_csv():
-    from celery_app import generate_csv
-    generate_csv.delay()
-    return {
-        'message': 'CSV generation task has been started!'
-    }, 200
+# @app.route('/generate_csv', methods=['GET'])
+# def generate_csv():
+#     from celery_app import generate_csv
+#     generate_csv.delay()
+#     return {
+#         'message': 'CSV generation task has been started!'
+#     }, 200
 
 
-from controllers.authentication_apis import LoginAPI, LogoutAPI, RegisterAPI, CheckEmailAPI
+from controllers.authentication_apis import LoginAPI, LogoutAPI, RegistersAPI,RegistercAPI, CheckEmailAPI
 api.add_resource(LoginAPI, '/login')
 api.add_resource(LogoutAPI, '/logout')
-api.add_resource(RegisterAPI, '/register')
+api.add_resource(RegistersAPI, '/registers')
+api.add_resource(RegistercAPI, '/registerc')
 api.add_resource(CheckEmailAPI, '/check-email')
 
 
