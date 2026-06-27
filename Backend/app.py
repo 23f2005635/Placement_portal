@@ -1,91 +1,68 @@
-from flask import Flask
-from flask_security import Security, hash_password
-from flask_restful import Api
+from flask import Flask, request, jsonify
 from flask_cors import CORS
+from models import db, User, Company, Student, JobPosition, Application, Placement
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
-from controllers.database import db
-from controllers.config import Config
-from controllers.user_datastore import user_datastore
+app = Flask(__name__)
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Placement.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
 
-    db.init_app(app)
-    security = Security(app, user_datastore)
 
-    api = Api(app, prefix='/api')
+CORS(app)
 
+db.init_app(app)
+
+jwt = JWTManager(app)
+
+
+
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({'message': 'Username already exists'}), 400
+    
+    user = User(
+        username=data['username'],
+        email=data['email'],        
+        password=generate_password_hash(data['password']),
+        role='user'
+    )
+    db.session.add(user)
+    db.session.commit()
+    
+    return jsonify({'message': 'User registered successfully'}), 200
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    user = User.query.filter_by(username=data['username']).first()
+    
+    if user and check_password_hash(user.password, data['password']):
+        access_token = create_access_token(identity=user.id)
+        return jsonify({'message': 'Login successful', 'data': {'username': user.username, 'email': user.email, 'role': user.role, 'access_token': access_token}}), 200
+    else:
+        return jsonify({'message': 'Invalid username or password'}), 401
+
+@app.route('/', methods=['GET'])
+def get_data():
+    data = {
+        'message': 'Hello from the backend',
+        'items': [1, 2, 3, 4, 5]
+        }
+    return jsonify(data)
+
+
+if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-
-        admin_role = user_datastore.find_or_create_role(name='admin', description='Administrator')
-        student_role = user_datastore.find_or_create_role(name='student', description='Student')
-        company_role = user_datastore.find_or_create_role(name='company',description='Company')
-
-        if not user_datastore.find_user(email='admin@gmail.com'):
-            user_datastore.create_user(
-                email = "admin@gmail.com",
-                password = "admin123",
-                roles=[admin_role]
-            )
-        
-        db.session.commit()
-
-    return app, api
-
-
-app, api = create_app()
-CORS(app, origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ])
-# @app.route('/')
-# def index():
-#     return {
-#         'message': 'Welcome to the Flask Security API!'
-#     }, 200
-
-# @app.route('/something/<int:id>', methods=['POST'])
-# def something(id):
-#     pass
-
-# @app.route('/something', methods=['PUT'])
-# def something_put():
-#     pass
-
-# class Index(Resource):
-#     def get(self):
-#         return {
-#             'message': 'Welcome to the Flask Security API!'
-#         }, 200  
-    
-# api.add_resource(Index, '/')
-
-# @app.route('/celery_example', methods=['GET'])
-# def celery_example():
-#     from celery_app import example_task
-#     example_task.delay()
-#     return {
-#         'message': 'Celery task has been started!'
-#     }, 200
-
-# @app.route('/generate_csv', methods=['GET'])
-# def generate_csv():
-#     from celery_app import generate_csv
-#     generate_csv.delay()
-#     return {
-#         'message': 'CSV generation task has been started!'
-#     }, 200
-
-
-from controllers.authentication_apis import LoginAPI, LogoutAPI, RegistersAPI,RegistercAPI, CheckEmailAPI
-api.add_resource(LoginAPI, '/login')
-api.add_resource(LogoutAPI, '/logout')
-api.add_resource(RegistersAPI, '/registers')
-api.add_resource(RegistercAPI, '/registerc')
-api.add_resource(CheckEmailAPI, '/check-email')
-
-
-if __name__ == "__main__":
+        if not User.query.filter_by(username='admin').first():
+            admin = User(username='admin', email='admin@gmail.com', password=generate_password_hash('admin'), role='admin')
+            db.session.add(admin)
+            db.session.commit()
     app.run(debug=True)
