@@ -12,7 +12,7 @@ class User(db.Model,UserMixin):
     password=db.Column(db.String(255),nullable=False)
     role=db.Column(db.String(50),nullable=False)
     active=db.Column(db.Boolean,default=True)
-    approved=db.Column(db.Boolean,default=False)
+    approved=db.Column(db.String(50),default="pending")
     company=db.relationship("Company",backref="user",uselist=False)
     student=db.relationship("Student",backref="user",uselist=False)
 
@@ -26,7 +26,6 @@ class Company(db.Model):
     location=db.Column(db.String(100))
     hr_contact=db.Column(db.String(100))
     website=db.Column(db.String(255))
-    approval_status=db.Column(db.String(50),default="Pending")
     jobs=db.relationship("JobPosition",backref="company")
     drives=db.relationship("PlacementDrive",backref="company")
 
@@ -49,20 +48,18 @@ class JobPosition(db.Model):
     company_id=db.Column(db.Integer,db.ForeignKey("company.id"))
     title=db.Column(db.String(100))
     salary=db.Column(db.Integer)
-    skills_required=db.Column(db.String(255))
     description=db.Column(db.Text)
 
 
 class PlacementDrive(db.Model):
     id=db.Column(db.Integer,primary_key=True)
     company_id=db.Column(db.Integer,db.ForeignKey("company.id"))
-    job_title=db.Column(db.String(100))
-    job_description=db.Column(db.Text)
-    eligibility_branch=db.Column(db.String(100))
+    job_title=db.Column(db.ForeignKey("job_position.title"))
+    job_description=db.Column(db.ForeignKey("job_position.description"))
+    work_location=db.Column(db.String(100))
     eligibility_cgpa=db.Column(db.Float)
-    eligibility_year=db.Column(db.Integer)
     application_deadline=db.Column(db.DateTime)
-    status=db.Column(db.String(50),default="Pending")
+    approved=db.Column(db.String(50),default="pending")
     applications=db.relationship("Application",backref="drive")
 
 
