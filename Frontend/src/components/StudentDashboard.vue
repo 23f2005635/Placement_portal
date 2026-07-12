@@ -36,13 +36,15 @@
             <td>{{ company.website }}</td>
             <td>{{ company.hr_contact }}</td>
             <td>
-              <button @click="slectedcompany=company.id; checkplacementdrive()" class="btn btn-primary">check placement drives</button>
+              <button @click="selectedCompany=company.id; activeTab='show_drive'" class="btn btn-primary">check placement drives</button>
             </td>
           </tr>
         </tbody>
       </table>
+
       
     </div>
+    <showdrive v-if="activeTab==='show_drive'" :company-id="selectedCompany" @change-tab="activeTab = ''"/>
   </div>
   </div>
 </template>
@@ -50,10 +52,12 @@
 <script>
 import axios from 'axios'
 import updatestudent from './updatestudent.vue';
+import showdrive from './showdrive.vue'
 export default {
   name: 'StudentDashboard',
   components:{
-    updatestudent
+    updatestudent,
+    showdrive
   },
   data() {
     return {
@@ -61,6 +65,7 @@ export default {
       currentUser: {},
       company_data:[],
       user_data :{},
+      selectedCompany:0,
       // Add any data properties you need for the student dashboard
     }
   },

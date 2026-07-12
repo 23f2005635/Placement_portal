@@ -140,12 +140,15 @@
           <th>Email</th>
           <th>Drive id</th>
           <th>Job title</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="appl in studentapplication" :key="appl.id">
           <td>{{ appl.username }}</td>
           <td>{{ appl.email }}</td>
+          <td>{{ appl.drive_id }}</td>
+          <td>{{ appl.job_title }}</td>
           <td>
             <button @click=" showapplication()" class="btn btn-success">view</button>
             

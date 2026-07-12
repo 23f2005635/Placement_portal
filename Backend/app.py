@@ -2,15 +2,20 @@ from datetime import datetime
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from models import db, User, Company, Student, JobPosition, Application, PlacementDrive,Placement
+from models import db, User, Company, Student,Application, PlacementDrive,Placement
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity,get_jwt
+
+from flask_caching import Cache
+
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Placement.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
+app.config['CACHE_TYPE'] = 'RedisCache'
+app.config['CACHE_REDIS_URL'] = 'redis://localhost:6379/0'
 
 
 CORS(app, resources={
@@ -25,7 +30,7 @@ db.init_app(app)
 
 jwt = JWTManager(app)
 
-
+cache = Cache(app)
 
 
 
@@ -122,6 +127,7 @@ def admin_login():
 
 @app.route('/api/admin/fetchtotaldetails', methods=['GET'])
 @jwt_required()
+@cache.cached(timeout=180)
 def fetch_total_details():
     if get_jwt()['role'] != 'admin':
         return jsonify({'message': 'Unauthorized access'}), 403
@@ -171,9 +177,9 @@ def fetch_total_details():
     for application in applications:
         
         studentapplication.append({
-            'id': application.drive.company.id,
-            'username': application.drive.company.user.username,
-            'email': application.drive.company.user.email,
+            'id': application.student.user_id,
+            'username': application.student.user.username,
+            'email': application.student.user.email,
             'drive_id': application.drive.id,
             'job_title': application.drive.job_title,
                 
@@ -335,7 +341,8 @@ def create_placement_drive():
             data.get('applicationDeadline'),
             '%Y-%m-%d'
         ).date(),
-    approved="pending"
+    approved="pending",
+    salary=data.get('salary')
     )
     db.session.add(placement_drive)
     db.session.commit()
@@ -744,6 +751,79 @@ def update_company_profile():
 
 
 
+
+
+
+@app.route('/api/company/details', methods=['POST'])
+def company_details():
+    data = request.get_json()
+    print(data)
+    company_id = data.get("company_id")
+
+    company = Company.query.get(company_id)
+    drives = PlacementDrive.query.filter_by(company_id=company_id,approved='approved').all()
+    print(company_id)
+    print(drives)
+    return jsonify({
+        "company": {
+            "id": company.id,
+            "name": company.company_name,
+            "industry": company.industry,
+            "location": company.location
+        },
+        "placement_drives": [
+            {
+                "id": d.id,
+                "title": d.job_title
+                
+            } for d in drives
+        ]
+    })
+
+
+
+
+
+
+
+
+@app.route('/api/ApplyPlacement',methods=['POST'])
+@jwt_required()
+def ApplyPlacement():
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+
+    if current_user.role != 'student':
+        return jsonify({'message': 'Unauthorized access'}), 403
+
+    student = current_user.student
+    print("User:", current_user)
+    print("Role:", current_user.role)
+    if not student:
+        return jsonify({'message': 'Student not found'}), 404
+
+    data = request.get_json()
+
+    drive_id = data.get("drive_id")
+
+    drive = PlacementDrive.query.get(drive_id)
+
+    if not drive:
+        return jsonify({'message': 'Placement drive not found'}), 404
+
+    
+    if student.cgpa < drive.eligibility_cgpa:
+        return jsonify({'message': 'Student is not eligible for this placement drive'}), 400
+    
+    # Create a new application
+    application = Application(
+        student_id=student.id,
+        drive_id=drive.id
+    )
+    db.session.add(application)
+    db.session.commit()
+
+    return jsonify({'message': 'Application submitted successfully'}), 201
 
 
 

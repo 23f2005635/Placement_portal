@@ -17,6 +17,10 @@
       <input type="text" class="form-control" id="eligibility_cgpa" placeholder="Enter minimum CGPA" v-model="form.eligibilityCgpa">
     </div>
     <div class="form-group">
+      <label for="salary">Salary</label>
+      <input type="text" class="form-control" id="salary" placeholder="Enter minimum CGPA" v-model="form.salary">
+    </div>
+    <div class="form-group">
       <label for="application_deadline">Application Deadline</label>
       <input type="date" class="form-control" id="application_deadline" v-model="form.applicationDeadline">
     </div>
@@ -33,7 +37,8 @@ export default {
         jobDescription: '',
         workLocation: '',
         eligibilityCgpa: '',
-        applicationDeadline: ''
+        applicationDeadline: '',
+        salary:0
       }
     }
   },

@@ -26,7 +26,6 @@ class Company(db.Model):
     location=db.Column(db.String(100))
     hr_contact=db.Column(db.String(100))
     website=db.Column(db.String(255))
-    jobs=db.relationship("JobPosition",backref="company")
     drives=db.relationship("PlacementDrive",backref="company")
 
 
@@ -43,19 +42,15 @@ class Student(db.Model):
     applications=db.relationship("Application",backref="student")
 
 
-class JobPosition(db.Model):
-    id=db.Column(db.Integer,primary_key=True)
-    company_id=db.Column(db.Integer,db.ForeignKey("company.id"))
-    title=db.Column(db.String(100))
-    salary=db.Column(db.Integer)
-    description=db.Column(db.Text)
+
 
 
 class PlacementDrive(db.Model):
     id=db.Column(db.Integer,primary_key=True)
     company_id=db.Column(db.Integer,db.ForeignKey("company.id"))
-    job_title=db.Column(db.ForeignKey("job_position.title"))
-    job_description=db.Column(db.ForeignKey("job_position.description"))
+    job_title=db.Column(db.String(100))
+    salary=db.Column(db.Integer)
+    job_description=db.Column(db.Text)
     work_location=db.Column(db.String(100))
     eligibility_cgpa=db.Column(db.Float)
     application_deadline=db.Column(db.DateTime)
@@ -63,13 +58,18 @@ class PlacementDrive(db.Model):
     applications=db.relationship("Application",backref="drive")
 
 
+from datetime import datetime
+
 class Application(db.Model):
-    id=db.Column(db.Integer,primary_key=True)
-    student_id=db.Column(db.Integer,db.ForeignKey("student.id"))
-    drive_id=db.Column(db.Integer,db.ForeignKey("placement_drive.id"))
-    job_id=db.Column(db.Integer,db.ForeignKey("job_position.id"))
-    application_date=db.Column(db.DateTime,default=datetime.utcnow)
-    status=db.Column(db.String(50),default="Applied")
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=False)
+    drive_id = db.Column(db.Integer, db.ForeignKey("placement_drive.id"), nullable=False)
+    application_date = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50), default="Applied")
+
+    __table_args__ = (
+        db.UniqueConstraint('student_id', 'drive_id', name='unique_student_drive'),
+    )
 
 
 class Placement(db.Model):
