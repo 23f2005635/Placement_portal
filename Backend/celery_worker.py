@@ -11,15 +11,26 @@ class FlaskTask(Task):
                 return self.run(*args, **kwargs)
             
 celery_app.Task = FlaskTask      
+celery_app.conf.enable_utc = False
+celery_app.conf.timezone = 'Asia/Kolkata'
 
 
 celery_app.conf.beat_schedule = {
+    # 'monthly-user-report': {
+    #     'task': 'tasks.send_monthly_report',  
+    #     'schedule': crontab(hour=16, minute=59, day_of_month=13),
+    # },
+    
+    
+
+
+
     'monthly-user-report': {
-        'task': 'tasks.send_monthly_report',  
-        'schedule': crontab(hour=0, minute=0, day_of_month=1),
+        'task': 'tasks.send_monthly_report',
+        'schedule': crontab(minute='*/1'),
     },
     'daily-reminder':{
         'task': 'tasks.send_daily_reminder',
-        'schedule': crontab(hour=8, minute=0),
+        'schedule': crontab(minute='*/1'),
     },
 }

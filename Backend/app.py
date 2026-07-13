@@ -143,6 +143,7 @@ def fetch_total_details():
     pending_companies_data = []
     studentapplication = []
     applications = Application.query.all()
+    placements = Placement.query.all()
     # approved_company = Company.query.filter_by(approved='approved').all()
     students=Student.query.join(User).filter(
     User.role == "student",
@@ -151,15 +152,23 @@ def fetch_total_details():
     companya=[]
     student=[]
     pending_drive=[]
+    placement=[]
     drive = PlacementDrive.query.filter_by(approved='pending').all()
 
     for company in pending_companies:
         pending_companies_data.append({
             'id': company.id,
             'username': company.username,
-            'email': company.email
+            'email': company.email,
         })
-
+    for p in placements:
+        placement.append({
+            'id':p.id,
+            "student_name": Student.query.get(p.student_id).name,
+            "company_name": Company.query.get(p.company_id).company_name,
+            'drive_id':p.drive_id,
+            'salary':p.salary,
+        })
     for prdrive in drive:
         pending_drive.append({
             'id':prdrive.id,
@@ -182,6 +191,7 @@ def fetch_total_details():
             'email': application.student.user.email,
             'drive_id': application.drive.id,
             'job_title': application.drive.job_title,
+            'status' : application.status,
                 
         })
     for company in approved_companies:
@@ -218,7 +228,8 @@ def fetch_total_details():
         'studentapplication':studentapplication,
         'pending_drive':pending_drive,
         'company': companya,
-        'student':student
+        'student':student,
+        'placements':placement
         
     }), 200
 
@@ -511,79 +522,6 @@ def show_current_user():
 
 
 
-# @app.route('/api/admin/search_users_companies', methods=['POST'])
-# @jwt_required()
-# def search_users_companies():
-#     current_user_id = get_jwt_identity()
-#     current_user = User.query.get(current_user_id)
-
-#     if current_user.role != 'admin':
-#         return jsonify({'message': 'Unauthorized access'}), 403
-
-#     search = request.json.get('search', '').strip()
-
-#     users_data = []
-#     students_data = []
-#     companies_data = []
-
-#     # ---------------- SEARCH SINGLE USER ----------------
-#     if search:
-#         user = None
-
-#         # If search is ID
-#         if search.isdigit():
-#             user = User.query.get(int(search))
-
-#         # If search is username
-#         else:
-#             user = User.query.filter(User.username.ilike(f"%{search}%")).first()
-
-#         if user:
-#             user_data = {
-#                 'id': user.id,
-#                 'username': user.username,
-#                 'email': user.email,
-#                 'role': user.role,
-#                 'active': user.active,
-#                 'approved': user.approved
-#             }
-
-#             users_data.append(user_data)
-
-#             # If user is company → fetch company details
-#             if user.role == "company" and user.company:
-#                 company = user.company
-#                 companies_data.append({
-#                     'id': company.id,
-#                     'company_name': company.company_name,
-#                     'profile': company.profile,
-#                     'industry': company.industry,
-#                     'location': company.location,
-#                     'hr_contact': company.hr_contact,
-#                     'website': company.website,
-#                     'approved': user.approved
-#                 })
-#             elif user.role == "student" and user.student:
-#                 student = user.student
-#                 students_data.append({
-#                     'id': student.id,
-#                     'name': student.name,
-#                     'branch': student.branch,
-#                     'education': student.education,
-#                     'cgpa': student.cgpa,
-#                     'year': student.year,
-#                     'skills': student.skills,
-#                     'resume': student.resume
-#                 })
-
-#         return jsonify({
-#             'students': students_data,
-#             'companies': companies_data
-#         }), 200
-    
-
-
-
 
 
 
@@ -628,28 +566,6 @@ def update_company_profile():
 
 
 
-# @app.route('/api/create_placement_drive', methods=['POST'])
-# @jwt_required()
-# def create_placement_drive():
-#     current_user_id = get_jwt_identity()
-#     current_user = User.query.get(current_user_id)
-
-#     if current_user.role != 'company':
-#         return jsonify({'message': 'Unauthorized access'}), 403
-
-#     data = request.get_json()
-#     placement_drive = PlacementDrive(
-#         company_id=current_user.company.id,
-#         job_title=data.get('job_title'),
-#         job_description=data.get('job_description'),
-#         work_location=data.get('work_location'),
-#         application_deadline=data.get('application_deadline'),
-#         eligibility_cgpa=data.get('eligibility_cgpa'),
-#     )
-#     db.session.add(placement_drive)
-#     db.session.commit()
-
-#     return jsonify({'message': 'Placement drive created successfully'}), 201
 
 
 
@@ -660,94 +576,6 @@ def update_company_profile():
 
 
 
-
-# @app.route('/api/student/apply_to_placement_drive/<int:drive_id>', methods=['PUT'])
-# @jwt_required()
-# def apply_to_placement_drive(drive_id):
-#     current_user_id = get_jwt_identity()
-#     current_user = User.query.get(current_user_id)
-
-#     if current_user.role != 'student':
-#         return jsonify({'message': 'Unauthorized access'}), 403
-
-#     student = current_user.student
-#     if not student:
-#         return jsonify({'message': 'Student not found'}), 404
-
-#     drive = PlacementDrive.query.get(drive_id)
-#     if not drive:
-#         return jsonify({'message': 'Placement drive not found'}), 404
-
-    
-#     if student.cgpa < drive.eligibility_cgpa:
-#         return jsonify({'message': 'Student is not eligible for this placement drive'}), 400
-#     job=JobPosition.query.filter_by(company_id=drive.company_id,title=drive.job_title).first()
-#     # Create a new application
-#     application = Application(
-#         student_id=student.id,
-#         drive_id=drive.id,
-#         job_id=job.id
-#     )
-#     db.session.add(application)
-#     db.session.commit()
-
-#     return jsonify({'message': 'Application submitted successfully'}), 201
-
-
-
-
-
-# @app.route('/api/company/view_applications', methods=['GET'])
-# @jwt_required()
-# def view_applications():
-#     current_user_id = get_jwt_identity()
-#     current_user = User.query.get(current_user_id)
-
-#     if current_user.role != 'company':
-#         return jsonify({'message': 'Unauthorized access'}), 403
-
-#     company = current_user.company
-#     if not company:
-#         return jsonify({'message': 'Company not found'}), 404
-
-#     drives = PlacementDrive.query.filter_by(company_id=company.id).all()
-#     applications = Application.query.join(PlacementDrive).filter(PlacementDrive.company_id == company.id).all()
-#     applications_data = []
-#     for application in applications:
-#         student = application.student
-#         applications_data.append({
-#             'application_id': application.id,
-#             'student_id': student.id,
-#             'student_name': student.name,
-#             'student_cgpa': student.cgpa,
-#             'drive_id': drives.id,
-#             'job_title': drives.job_title,
-#             'application_date': application.application_date,
-#             'status': application.status
-#         })
-
-#     return jsonify({'applications': applications_data}), 200
-
-
-
-# @app.route('/api/update_application_status/<int:application_id>', methods=['PUT'])
-# @jwt_required()
-# def update_application_status(application_id):
-#     current_user_id = get_jwt_identity()
-#     current_user = User.query.get(current_user_id)
-
-#     if current_user.role != 'company':
-#         return jsonify({'message': 'Unauthorized access'}), 403
-
-#     application = Application.query.get(application_id)
-#     if not application:
-#         return jsonify({'message': 'Application not found'}), 404
-
-#     data = request.get_json()
-#     application.status = data.get('status', application.status)
-#     db.session.commit()
-
-#     return jsonify({'message': 'Application status updated successfully'}), 200
 
 
 
@@ -757,13 +585,12 @@ def update_company_profile():
 @app.route('/api/company/details', methods=['POST'])
 def company_details():
     data = request.get_json()
-    print(data)
+    
     company_id = data.get("company_id")
 
     company = Company.query.get(company_id)
     drives = PlacementDrive.query.filter_by(company_id=company_id,approved='approved').all()
-    print(company_id)
-    print(drives)
+    
     return jsonify({
         "company": {
             "id": company.id,
@@ -797,8 +624,6 @@ def ApplyPlacement():
         return jsonify({'message': 'Unauthorized access'}), 403
 
     student = current_user.student
-    print("User:", current_user)
-    print("Role:", current_user.role)
     if not student:
         return jsonify({'message': 'Student not found'}), 404
 
@@ -824,6 +649,146 @@ def ApplyPlacement():
     db.session.commit()
 
     return jsonify({'message': 'Application submitted successfully'}), 201
+
+
+
+
+
+
+
+@app.route('/api/fetch_drive',methods=['GET'])
+@jwt_required()
+def fetch_drive():
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+
+    if current_user.role != 'company':
+        return jsonify({'message': 'Unauthorized access'}), 403
+    drives=[]
+    application=[]
+    companyy=current_user.company
+    drivess=companyy.drives
+    for drive in drivess:
+        if drive.approved=='approved':
+            drives.append({
+                'id':drive.id,
+                'job_title':drive.job_title,
+                'eligibility':drive.eligibility_cgpa
+            })
+        appls=drive.applications
+        for appl in appls:
+            if appl.status=='Applied':
+                application.append({
+                    'id':appl.id,
+                    'drive_id':appl.drive_id,
+                    'student_id':appl.student_id,
+                    'student_name':appl.student.name,
+                    'cgpa':appl.student.cgpa,
+                    'application_date':appl.application_date,
+                })
+
+   
+    return jsonify({
+    "drives": drives,
+    "applications": application
+})
+
+
+
+
+
+
+
+@app.route('/api/approveappl',methods=['POST'])
+@jwt_required()
+def approveappl():
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    data=request.get_json()
+    appl_id=data.get('id')
+    if current_user.role != 'company':
+        return jsonify({'message': 'Unauthorized access'}), 403
+
+    appl=Application.query.get(appl_id)
+    appl.status="Placed"
+
+    placement=Placement(
+        student_id=appl.student_id,
+        company_id = current_user.company.id,
+        drive_id=appl.drive_id,
+        position=appl.drive.job_title,
+        salary=appl.drive.salary,
+        joining_date=datetime.utcnow()
+
+    )
+    db.session.add(placement)
+    db.session.commit()
+    return jsonify({"message": "Application approved successfully"})
+
+
+
+
+
+
+@app.route('/api/removeappl',methods=['POST'])
+@jwt_required()
+def removeappl():
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    data=request.get_json()
+    appl_id=data.get('id')
+    if current_user.role != 'company':
+        return jsonify({'message': 'Unauthorized access'}), 403
+
+    appl=Application.query.get(appl_id)
+    appl.status="Not placed"
+
+    # placement=Placement(
+    #     student_id=appl.student_id,
+    #     company_id = current_user.company.id,
+    #     drive_id=appl.drive_id,
+    #     position=appl.drive.job_title,
+    #     salary=appl.drive.salary,
+    #     joining_date=datetime.utcnow()
+
+    # )
+    db.session.commit()
+    return jsonify({"message": "Application removed successfully"})
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/api/applhist',methods=['GET'])
+@jwt_required()
+def applhist():
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    student=current_user.student
+    applications=Application.query.filter_by(student_id=student.id).all()
+    applicationhist=[]
+    for a in applications:
+        applicationhist.append({
+            'id':a.id,
+            'student_id':a.student_id,
+            'drive_id':a.drive_id,
+            'application_date':a.application_date,
+            'status':a.status
+        })
+    return jsonify({'applicationhist':applicationhist})
+
+
+
+
+
+
 
 
 

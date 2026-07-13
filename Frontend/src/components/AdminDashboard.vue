@@ -132,7 +132,33 @@
     </div>
 
     <div>
-      <h2>Student application</h2>
+      <h2>Total Student  Placed</h2>
+      <table class="table"> 
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Student Name</th>
+          <th>Company name</th>
+          <th>Drive id</th>
+          <th>salary</th>
+          
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="p in placements" :key="p.id">
+          <td>{{ p.id }}</td>
+          <td>{{ p.student_name }}</td>
+          <td>{{ p.company_name }}</td>
+          <td>{{ p.drive_id }}</td>
+          <td>{{ p.salary }}
+            
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div>
+      <h2>Total Student  application</h2>
       <table class="table"> 
       <thead>
         <tr>
@@ -140,7 +166,7 @@
           <th>Email</th>
           <th>Drive id</th>
           <th>Job title</th>
-          <th>Action</th>
+          <th>status</th>
         </tr>
       </thead>
       <tbody>
@@ -149,8 +175,7 @@
           <td>{{ appl.email }}</td>
           <td>{{ appl.drive_id }}</td>
           <td>{{ appl.job_title }}</td>
-          <td>
-            <button @click=" showapplication()" class="btn btn-success">view</button>
+          <td>{{ appl.status }}
             
           </td>
         </tr>
@@ -177,7 +202,8 @@ export default {
       studentapplication:[],
       pending_drive:[],
       selectedCompany: 0,
-      selecteddrive:0
+      selecteddrive:0,
+      placements:[]
       // Add any data properties you need for the admin dashboard
     }
   },
@@ -205,6 +231,7 @@ export default {
         this.company = response.data.company
         this.student = response.data.student
         this.studentapplication = response.data.studentapplication
+        this.placements = response.data.placements
       } catch (error) {
         console.log(error.response.status);
         console.log(error.response.data);

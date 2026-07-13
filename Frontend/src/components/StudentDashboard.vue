@@ -15,6 +15,31 @@
       <button @click="activeTab='create'" class="btn btn-outline-success" type="button">Update Profile</button>
           <updatestudent v-if="activeTab === 'create'" @change-tab="activeTab = ''" />
     </div>
+    <div>
+    <div>
+      <button @click="activeTab='showhist'; applhistf()">Show history</button>
+      <table class="table" v-if="activeTab==='showhist'">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Drive Id</th>
+            <th>Application_date</th>
+            <th>status</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="a in applhist" :key="a.id">
+            <td>{{ a.id }}</td>
+            <td>{{ a.drive_id }}</td>
+            <td>{{ a.application_date }}</td>
+            <td>{{ a.status }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+      
+    </div>
     <div class="table" style="margin-top: 10px;height: 250px; overflow-y: auto; overflow-x: auto; border: 1px solid">
       <h2>Placement drives</h2>
       <table class="table">
@@ -66,6 +91,7 @@ export default {
       company_data:[],
       user_data :{},
       selectedCompany:0,
+      applhist:[],
       // Add any data properties you need for the student dashboard
     }
   },
@@ -91,6 +117,20 @@ export default {
         }
       },
 
+      async applhistf() {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.get('http://localhost:5000/api/applhist', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          this.applhist = response.data.applicationhist
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      },
+
 
       async fetchcompanies() {
       try {
@@ -109,6 +149,7 @@ export default {
     checkplacementdrive(companyId) {
       this.$router.push({ name: 'PlacementDrive', params: { companyId } })
     },
+    
     updateprof() {
       this.$router.push('/update-profile')
     }
@@ -117,6 +158,7 @@ export default {
   async mounted() {
     this.fetchcompanies()
     this.showprofile()
+    this.applhist()
   }
 }
 </script>
