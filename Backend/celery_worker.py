@@ -31,6 +31,6 @@ celery_app.conf.beat_schedule = {
     },
     'daily-reminder':{
         'task': 'tasks.send_daily_reminder',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute='*/2'),
     },
 }
