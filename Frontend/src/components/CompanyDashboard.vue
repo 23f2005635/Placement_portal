@@ -45,9 +45,10 @@
       </tbody>
     </table>
     <div v-if="activeTab==='showappl'">
+      <h2>Application to the placement drive you selected</h2>
       <table class="table">
         <thead>
-          <h2>Application to the placement drive you selected</h2>
+          
           <tr >
             <th>Drive id</th>
             <th>Student id</th>

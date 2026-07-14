@@ -127,7 +127,7 @@ def admin_login():
 
 @app.route('/api/admin/fetchtotaldetails', methods=['GET'])
 @jwt_required()
-@cache.cached(timeout=180)
+@cache.cached(timeout=5)
 def fetch_total_details():
     if get_jwt()['role'] != 'admin':
         return jsonify({'message': 'Unauthorized access'}), 403

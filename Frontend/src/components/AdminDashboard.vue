@@ -261,41 +261,6 @@ export default {
         await this.fetchtotaldata()
 
 
-    // async searchData() {
-    //   try {
-    //     const token = localStorage.getItem('admin_token')
-    //     const response = await axios.post(`http://localhost:5000/api/admin/search_users_companies`, {
-    //       search: this.search
-    //     }, {
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     })
-    //     console.log('Search response:', response.data)
-    //     this.company_data = response.data.companies
-    //     this.student_data = response.data.students
-    //     // Handle the search results as needed
-    //   } catch (error) {
-    //     console.error('Search error:', error)
-    //   }
-    // },
-
-
-
-    // async fetchPendingCompanies() {
-    //   try {
-    //     const token = localStorage.getItem('admin_token')
-    //     const response = await axios.get('http://localhost:5000/api/admin/fetch_pending_companies', {
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     })
-    //     console.log('Pending Companies response:', response.data)
-    //     this.pending_companies = response.data.pending_companies
-    //   } catch (error) {
-    //     console.error('Pending Companies error:', error)
-    //   }
-    // },
 
   },
   async rejectCompany(){
