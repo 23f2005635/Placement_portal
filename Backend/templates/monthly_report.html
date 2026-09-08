@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Monthly Placement Report</title>
+    <style>
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background:#f4f4f4;
+            margin:0;
+            padding:20px;
+        }
+
+        .container{
+            max-width:900px;
+            margin:auto;
+            background:white;
+            border-radius:8px;
+            padding:25px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1{
+            text-align:center;
+            color:#0d6efd;
+        }
+
+        h2{
+            margin-top:35px;
+            color:#444;
+            border-bottom:2px solid #0d6efd;
+            padding-bottom:5px;
+        }
+
+        .summary{
+            display:flex;
+            justify-content:space-between;
+            margin:20px 0;
+        }
+
+        .card{
+            width:30%;
+            background:#eef5ff;
+            border-radius:8px;
+            text-align:center;
+            padding:15px;
+        }
+
+        .card h3{
+            margin:0;
+            color:#0d6efd;
+        }
+
+        .card p{
+            font-size:26px;
+            margin-top:10px;
+            font-weight:bold;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:15px;
+        }
+
+        th{
+            background:#0d6efd;
+            color:white;
+            padding:10px;
+        }
+
+        td{
+            border:1px solid #ddd;
+            padding:10px;
+            text-align:center;
+        }
+
+        tr:nth-child(even){
+            background:#f9f9f9;
+        }
+
+        .footer{
+            margin-top:30px;
+            text-align:center;
+            color:gray;
+            font-size:14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Monthly Placement Activity Report</h1>
+
+    <p>
+        <strong>Report Generated On:</strong>
+        {{ current_date }}
+    </p>
+
+    <div class="summary">
+
+        <div class="card">
+            <h3>Total Drives</h3>
+            <p>{{ drive|length }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Applications</h3>
+            <p>{{ application|length }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Placements</h3>
+            <p>{{ placement|length }}</p>
+        </div>
+
+    </div>
+
+    <h2>Placement Drives Conducted</h2>
+
+    <table>
+        <tr>
+            <th>Drive ID</th>
+            <th>Company ID</th>
+            <th>Job Title</th>
+        </tr>
+
+        {% for d in drive %}
+        <tr>
+            <td>{{ d.id }}</td>
+            <td>{{ d.company_id }}</td>
+            <td>{{ d.job_title }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+
+
+    <h2>Applications Received</h2>
+
+    <table>
+        <tr>
+            <th>Application ID</th>
+            <th>Student ID</th>
+            <th>Drive ID</th>
+            <th>Status</th>
+        </tr>
+
+        {% for a in application %}
+        <tr>
+            <td>{{ a.id }}</td>
+            <td>{{ a.student_id }}</td>
+            <td>{{ a.drive_id }}</td>
+            <td>{{ a.status }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+
+
+    <h2>Students Selected</h2>
+
+    <table>
+
+        <tr>
+            <th>Placement ID</th>
+            <th>Student ID</th>
+            <th>Drive ID</th>
+            <th>Salary</th>
+        </tr>
+
+        {% for p in placement %}
+        <tr>
+            <td>{{ p.id }}</td>
+            <td>{{ p.student_id }}</td>
+            <td>{{ p.drive_id }}</td>
+            
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <div class="footer">
+        <p>
+            This is an automatically generated report from the Placement Portal.
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

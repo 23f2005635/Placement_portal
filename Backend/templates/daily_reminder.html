@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Deadline Reminder</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6f8; padding:30px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; border-radius:10px; overflow:hidden;">
+                    <tr>
+                        <td style="background:#0d6efd; color:#ffffff; padding:20px; text-align:center;">
+                            <h2 style="margin:0;">Placement Deadline Reminder</h2>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:30px; color:#333333; font-size:15px; line-height:1.6;">
+                            <p style="margin-top:0;">Hello <strong>{{ student_name }}</strong>,</p>
+
+                            <p>
+                                This is a reminder that your application deadline for the following placement drive is approaching.
+                            </p>
+
+                            <table width="100%" cellpadding="8" cellspacing="0" border="0" style="margin:20px 0; border:1px solid #dddddd; border-collapse:collapse;">
+                                <tr>
+                                    <td style="border:1px solid #dddddd;"><strong>Company</strong></td>
+                                    <td style="border:1px solid #dddddd;">{{ company_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="border:1px solid #dddddd;"><strong>Job Title</strong></td>
+                                    <td style="border:1px solid #dddddd;">{{ job_title }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="border:1px solid #dddddd;"><strong>Location</strong></td>
+                                    <td style="border:1px solid #dddddd;">{{ work_location }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="border:1px solid #dddddd;"><strong>Deadline</strong></td>
+                                    <td style="border:1px solid #dddddd;">{{ deadline.strftime('%d %b %Y %I:%M %p') }}</td>
+                                </tr>
+                            </table>
+
+                            <p>
+                                Please make sure to complete your application before the deadline.
+                            </p>
+
+                            <p style="margin-bottom:0;">
+                                Regards,<br>
+                                Placement Portal Team
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
