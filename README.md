@@ -157,3 +157,31 @@ Can view application status and placement history.
 | Student | Application | One-to-Many (A student can apply to multiple drives) |
 | PlacementDrive | Application | One-to-Many (A placement drive can receive multiple applications) |
 | Application | Placement | One-to-One (An application may result in one placement record) |
+
+
+
+===================== RUN Instructions ============================================================
+
+create venv
+
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirement.txt
+
+
+
+
+
+
+
+
+
+redis-server
+python app.py
+celery -A celery_worker.celery_app worker --loglevel=info            celery worker
+celery -A celery_worker.celery_app beat --loglevel=info                celery beat
+npm run dev 
+====== RUn mailhog
+http://localhost:8025
+mailhog
+~/go/bin/MailHog
